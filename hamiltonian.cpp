@@ -53,13 +53,15 @@ void write_results( const state_type &q, const double t)
   double t2     = q[1];
   double p1     = q[2];
   double p2     = q[3];
+
+  //  V = -(m1+m2)*L1*g*np.cos(th1) - m2*L2*g*np.cos(th2)
+  //  T = 0.5*m1*(L1*th1d)**2 + 0.5*m2*((L1*th1d)**2 + (L2*th2d)**2 +
+  //          2*L1*L2*th1d*th2d*np.cos(th1-th2))
   
-  double t1_dot = (l2*p1 - l1*p2*cos(t1-t2)) / (pow(l1,2)*l2*(m1 + m2*pow(sin(t1-t2),2)));
-  double t2_dot = (l1*(m1+m2)*p2 - l2*m2*p1*cos(t1-t2)) / (l1*pow(l2,2)*m2*(m1 + m2*pow(sin(t1-t2),2)));
+  double V = -(m1+m2)*l1*g*cos(t1) - m2*l2*g*cos(t2);
+  double T = 0.5*m1*pow(l1*p1,2) + 0.5*m2*(pow(l1*p1,2) + pow(l2*p2,2) + 2*l1*l2*p1*p2*cos(t1-t2));
   
-  double H = 0.5*(m1+m2)*pow(l1*t1_dot,2) + 0.5*m2*pow(l2*t2_dot,2) - m2*l1*l2*t1_dot*t2_dot*cos(t1-t2);
-  H = H/(m2*pow(l1*l2,2)*(m1+m2*pow(sin(t1-t2),2)));
-  H = H - (m1+m2)*g*l1*cos(t1) - m2*g*l2*cos(t2);
+  double H = T - V;
 
   double x1 =  l1*sin(t1);
   double y1 = -l1*cos(t1);

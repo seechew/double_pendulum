@@ -80,7 +80,7 @@ int main() {
   bool firstStep = true;
   arma::vec theta_dot_mid(2,arma::fill::zeros);
 
-  double H;
+  double V, T, H;
   double x1;
   double x2;
   double y1;
@@ -101,9 +101,13 @@ int main() {
     firstStep = false;
 
     /* PRINT HAMILTONIAN */
-    H = 0.5*(m1+m2)*pow(l1*theta_dot[0],2) + 0.5*m2*pow(l2*theta_dot[1],2) - m2*l1*l2*theta_dot[0]*theta_dot[1]*cos(theta[0]-theta[1]);
-    H = H/(m2*pow(l1*l2,2)*(m1+m2*pow(sin(theta[0]-theta[1]),2)));
-    H = H - (m1+m2)*g*l1*cos(theta[0]) - m2*g*l2*cos(theta[1]);
+    //  V = -(m1+m2)*L1*g*np.cos(th1) - m2*L2*g*np.cos(th2)
+    //  T = 0.5*m1*(L1*th1d)**2 + 0.5*m2*((L1*th1d)**2 + (L2*th2d)**2 +
+    //          2*L1*L2*th1d*th2d*np.cos(th1-th2))
+    
+    V = -(m1+m2)*l1*g*cos(theta[0]) - m2*l2*g*cos(theta[1]);
+    T = 0.5*m1*pow(l1*theta_dot[0],2) + 0.5*m2*(pow(l1*theta_dot[0],2) + pow(l2*theta_dot[1],2) + 2*l1*l2*theta_dot[0]*theta_dot[1]*cos(theta[0]-theta[1]));
+    H = T - V;
 
     x1 =  l1*sin(theta[0]);
     y1 = -l1*cos(theta[0]);
