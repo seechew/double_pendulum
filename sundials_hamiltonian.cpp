@@ -139,11 +139,13 @@ int main() {
   int flag = ERKStepSStolerances(erkode_mem, reltol, abstol);  /* SET TOLERANCES */
 
   /* flag = ERKStepSetTableNum(erkode_mem,BOGACKI_SHAMPINE_4_2_3);  */ // for older SUNDIALS solver only 
-  
+
+  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_BOGACKI_SHAMPINE_4_2_3);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_DORMAND_PRINCE_7_4_5);
-  flag = ERKStepSetTableNum(erkode_mem,ARKODE_FEHLBERG_13_7_8);
-  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_BOGACKI_SHAMPINE_4_2_3);
+  flag = ERKStepSetTableNum(erkode_mem,ARKODE_ARK548L2SAb_ERK_8_4_5);
+  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_VERNER_8_5_6);
+  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_FEHLBERG_13_7_8);
 
   realtype t = t0;
   //realtype dTout = (tf - t0)/n_steps;
