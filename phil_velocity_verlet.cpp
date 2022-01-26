@@ -1,3 +1,5 @@
+/* g++ phil_velocity_verlet.cpp -o phil.out */
+
 /*
 Reference: https://scienceworld.wolfram.com/physics/DoublePendulum.html
 */
@@ -62,8 +64,8 @@ int main() {
   double theta_dot_dot[2] = {0,0};
 
   double t0 = 0.0;
-  double dt = 1e-5;
-  double tf = 7200;
+  double dt = 1e-2;
+  double tf = 100;
   double current_t = t0 + dt; // INCREMENT 1
   bool firstStep = true;
   double theta_dot_mid[2] = {0,0};

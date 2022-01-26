@@ -1,4 +1,4 @@
-/* g++ sundials_hamiltonian.cpp -O3 -DNDEBUG  -I/usr/local/include -L/usr/local/lib -larmadillo -lsundials_arkode -lsundials_nvecserial -lsundials_nvecmanyvector -lm -Wl,-rpath,/usr/local/lib -o sundials
+/* g++ sundials_hamiltonian.cpp -O3 -DNDEBUG  -I/usr/local/include -L/usr/local/lib -larmadillo -lsundials_arkode -lsundials_nvecserial -lsundials_nvecmanyvector -lm -Wl,-rpath,/usr/local/lib -o sundials.out
 
 /*
    Reference: https://scienceworld.wolfram.com/physics/DoublePendulum.html   
@@ -39,14 +39,17 @@ void myfunc(const state_type& q, state_type& qdot, double t) {
   double t2 = q[1];
   double p1 = q[2];
   double p2 = q[3];
-  
-  double C1 = (p1*p2*sin(t1-t2)) / (l1*l2*(m1 + m2*pow(sin(t1-t2),2)));
-  double C2 = pow(l2,2)*pow(m2,2)*pow(p1,2) + pow(l1,2)*(m1+m2)*pow(p2,2) - l1*l2*m2*p1*p2*cos(t1-t2);
-  C2 = C2 * sin(2*(t1-t2));
-  C2 = C2 / (2*pow(l1,2)*pow(l2,2)*pow((m1 + m2*pow(sin(t1-t2),2)),2));
 
-  qdot[0] = (l2*p1 - l1*p2*cos(t1-t2)) / (pow(l1,2)*l2*(m1 + m2*pow(sin(t1-t2),2)));
-  qdot[1] = (l1*(m1+m2)*p2 - l2*m2*p1*cos(t1-t2)) / (l1*pow(l2,2)*m2*(m1 + m2*pow(sin(t1-t2),2)));
+  double s = sin(t1-t2);
+  double c = cos(t1-t2);
+  
+  double C1 = (p1*p2*s) / (l1*l2*(m1 + m2*pow(s,2)));
+  double C2 = pow(l2*p1,2)*m2 + pow(l1*p2,2)*(m1+m2) - l1*l2*m2*p1*p2*c;
+  C2 = C2 * sin(2*(t1-t2));
+  C2 = C2 / (2*pow(l1*l2,2)*pow((m1 + m2*pow(s,2)),2));
+
+  qdot[0] = (l2*p1 - l1*p2*c) / (pow(l1,2)*l2*(m1 + m2*pow(s,2)));
+  qdot[1] = (l1*(m1+m2)*p2 - l2*m2*p1*c) / (l1*pow(l2,2)*m2*(m1 + m2*pow(s,2)));
   qdot[2] = -(m1+m2)*g*l1*sin(t1) - C1 + C2;
   qdot[3] = -m2*g*l2*sin(t2) + C1 - C2;
   
@@ -62,12 +65,15 @@ void write_results( const N_Vector q, const double t)
   double p1     = NV_Ith_S(q,2);
   double p2     = NV_Ith_S(q,3);
 
+  double td1    = (l2*p1 - l1*p2*cos(t1-t2))/(pow(l1,2)*l2*(m1+m2*pow(sin(t1-t2),2)));
+  double td2    = (-m2*l2*p1*cos(t1-t2)+(m1+m2)*l1*p2)/(m2*l1*pow(l2,2)*(m1+m2*pow(sin(t1-t2),2)));
+  
   //  V = -(m1+m2)*L1*g*np.cos(th1) - m2*L2*g*np.cos(th2)
   //  T = 0.5*m1*(L1*th1d)**2 + 0.5*m2*((L1*th1d)**2 + (L2*th2d)**2 +
   //          2*L1*L2*th1d*th2d*np.cos(th1-th2))
   
   double V = -(m1+m2)*l1*g*cos(t1) - m2*l2*g*cos(t2);
-  double T = 0.5*m1*pow(l1*p1,2) + 0.5*m2*(pow(l1*p1,2) + pow(l2*p2,2) + 2*l1*l2*p1*p2*cos(t1-t2));
+  double T = 0.5*m1*pow(l1*td1,2) + 0.5*m2*(pow(l1*td1,2) + pow(l2*td2,2) + 2*l1*l2*td1*td2*cos(t1-t2));
   
   double H = T + V;
   
@@ -108,8 +114,8 @@ static int myf(realtype t, N_Vector q, N_Vector qdot, void *user_data)
 int main() {
 
   realtype t0 = RCONST(0.0);             /* INITIAL TIME */
-  realtype tf= RCONST(7.0);           /* FINAL TIME */
-  realtype expected_dt = RCONST(1e-5);    /* */
+  realtype tf= RCONST(100.0);           /* FINAL TIME */
+  realtype expected_dt = RCONST(1e-2);    /* */
   int n_steps;                           /* NUMBER OF STEPS */
   sunindextype neq = 4;                  /* NUMBER OF EQUATION */
   realtype reltol = RCONST(1.0e-6);      /* TOLERANCES */
@@ -132,8 +138,11 @@ int main() {
 
   int flag = ERKStepSStolerances(erkode_mem, reltol, abstol);  /* SET TOLERANCES */
 
-  //flag = ERKStepSetTableNum(erkode_mem,BOGACKI_SHAMPINE_4_2_3);  // for older SUNDIALS solver only 
-  flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
+  /* flag = ERKStepSetTableNum(erkode_mem,BOGACKI_SHAMPINE_4_2_3);  */ // for older SUNDIALS solver only 
+  
+  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
+  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_DORMAND_PRINCE_7_4_5);
+  flag = ERKStepSetTableNum(erkode_mem,ARKODE_FEHLBERG_13_7_8);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_BOGACKI_SHAMPINE_4_2_3);
 
   realtype t = t0;
