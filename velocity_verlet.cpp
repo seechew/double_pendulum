@@ -107,7 +107,7 @@ int main() {
     
     V = -(m1+m2)*l1*g*cos(theta[0]) - m2*l2*g*cos(theta[1]);
     T = 0.5*m1*pow(l1*theta_dot[0],2) + 0.5*m2*(pow(l1*theta_dot[0],2) + pow(l2*theta_dot[1],2) + 2*l1*l2*theta_dot[0]*theta_dot[1]*cos(theta[0]-theta[1]));
-    H = T - V;
+    H = T + V;
 
     x1 =  l1*sin(theta[0]);
     y1 = -l1*cos(theta[0]);

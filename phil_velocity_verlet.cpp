@@ -62,13 +62,13 @@ int main() {
   double theta_dot_dot[2] = {0,0};
 
   double t0 = 0.0;
-  double dt = 1e-2;
+  double dt = 1e-5;
   double tf = 7200;
   double current_t = t0 + dt; // INCREMENT 1
   bool firstStep = true;
   double theta_dot_mid[2] = {0,0};
 
-  double H;
+  double V, T, H;
   double x1;
   double x2;
   double y1;
@@ -101,7 +101,7 @@ int main() {
     
     V = -(m1+m2)*l1*g*cos(theta[0]) - m2*l2*g*cos(theta[1]);
     T = 0.5*m1*pow(l1*theta_dot[0],2) + 0.5*m2*(pow(l1*theta_dot[0],2) + pow(l2*theta_dot[1],2) + 2*l1*l2*theta_dot[0]*theta_dot[1]*cos(theta[0]-theta[1]));
-    H = T - V;
+    H = T + V;
 
     x1 =  l1*sin(theta[0]);
     y1 = -l1*cos(theta[0]);

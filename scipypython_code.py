@@ -29,12 +29,13 @@ def calc_E(y):
 
     th1, th1d, th2, th2d = y.T
     V = -(m1+m2)*L1*g*np.cos(th1) - m2*L2*g*np.cos(th2)
+    
     T = 0.5*m1*(L1*th1d)**2 + 0.5*m2*((L1*th1d)**2 + (L2*th2d)**2 +
             2*L1*L2*th1d*th2d*np.cos(th1-th2))
     return T + V
 
 # Maximum time, time point spacings and the time grid (all in s).
-tmax, dt = 7200, 1e-2
+tmax, dt = 7, 1e-2
 t = np.arange(0, tmax+dt, dt)
 # Initial conditions: theta1, dtheta1/dt, theta2, dtheta2/dt.
 # y0 = np.array([3*np.pi/7, 0, 3*np.pi/4, 0])
@@ -47,6 +48,7 @@ y = odeint(deriv, y0, t, args=(L1, L2, m1, m2))
 EDRIFT = 0.05
 # Total energy from the initial conditions
 E = calc_E(y0)
+print("Energy in the system: ", calc_E(y0))
 if np.max(np.sum(np.abs(calc_E(y) - E))) > EDRIFT:
     sys.exit('Maximum energy drift of {} exceeded.'.format(EDRIFT))
 

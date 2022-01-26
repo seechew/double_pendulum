@@ -1,4 +1,5 @@
-/* g++ hamiltonian.cpp -o hamiltonian -larmadillo -std=c++17*/
+/* g++ sundials_hamiltonian.cpp -O3 -DNDEBUG  -I/usr/local/include -L/usr/local/lib -larmadillo -lsundials_arkode -lsundials_nvecserial -lsundials_nvecmanyvector -lm -Wl,-rpath,/usr/local/lib -o sundials
+
 /*
    Reference: https://scienceworld.wolfram.com/physics/DoublePendulum.html   
 */
@@ -52,14 +53,14 @@ void myfunc(const state_type& q, state_type& qdot, double t) {
 }
 
 //----------------------------------------------------------------------------
-void write_results( const state_type &q, const double t)
+void write_results( const N_Vector q, const double t)
 {
   /* PRINT HAMILTONIAN */
   
-  double t1     = q[0];
-  double t2     = q[1];
-  double p1     = q[2];
-  double p2     = q[3];
+  double t1     = NV_Ith_S(q,0);
+  double t2     = NV_Ith_S(q,1);
+  double p1     = NV_Ith_S(q,2);
+  double p2     = NV_Ith_S(q,3);
 
   //  V = -(m1+m2)*L1*g*np.cos(th1) - m2*L2*g*np.cos(th2)
   //  T = 0.5*m1*(L1*th1d)**2 + 0.5*m2*((L1*th1d)**2 + (L2*th2d)**2 +
@@ -68,7 +69,7 @@ void write_results( const state_type &q, const double t)
   double V = -(m1+m2)*l1*g*cos(t1) - m2*l2*g*cos(t2);
   double T = 0.5*m1*pow(l1*p1,2) + 0.5*m2*(pow(l1*p1,2) + pow(l2*p2,2) + 2*l1*l2*p1*p2*cos(t1-t2));
   
-  double H = T - V;
+  double H = T + V;
   
   double x1 =  l1*sin(t1);
   double y1 = -l1*cos(t1);
@@ -107,15 +108,18 @@ static int myf(realtype t, N_Vector q, N_Vector qdot, void *user_data)
 int main() {
 
   realtype t0 = RCONST(0.0);             /* INITIAL TIME */
-  realtype tf= RCONST(1.0);              /* FINAL TIME */
-  int n_steps = 7;                       /* NUMBER OF STEPS */
+  realtype tf= RCONST(7.0);           /* FINAL TIME */
+  realtype expected_dt = RCONST(1e-5);    /* */
+  int n_steps;                           /* NUMBER OF STEPS */
   sunindextype neq = 4;                  /* NUMBER OF EQUATION */
   realtype reltol = RCONST(1.0e-6);      /* TOLERANCES */
   realtype abstol = RCONST(1.0e-10);    
 
   void *erkode_mem = NULL;      /* EMPTY ERKODE MEMORY STRUCTURE */
 
-  N_Vector q = N_VNew_Serial(neq);  /* for older SUNDIALS solver only */
+  // N_Vector q = N_VNew_Serial(neq);  /* for older SUNDIALS solver only */
+  sundials::Context context;
+  N_Vector q = N_VNew_Serial(neq, context);
 
   // IC
   NV_Ith_S(q,0)  = pi/2;         /* SET INITIAL CONDITION */
@@ -123,56 +127,58 @@ int main() {
   NV_Ith_S(q,2)  = 0.0;          /* SET INITIAL CONDITION */
   NV_Ith_S(q,3)  = 0.0;          /* SET INITIAL CONDITION */
 
-  erkode_mem = ERKStepCreate(myf, t0, q);    /* SET METHOD TO INTEGRATE */ 
-   
+  // erkode_mem = ERKStepCreate(myf, t0, q);    /* SET METHOD TO INTEGRATE */  // for older SUNDIALS solver only
+  erkode_mem = ERKStepCreate(myf, t0, q, context);    /* SET METHOD TO INTEGRATE */
+
   int flag = ERKStepSStolerances(erkode_mem, reltol, abstol);  /* SET TOLERANCES */
 
-  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
+  //flag = ERKStepSetTableNum(erkode_mem,BOGACKI_SHAMPINE_4_2_3);  // for older SUNDIALS solver only 
+  flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_BOGACKI_SHAMPINE_4_2_3);
-  flag = ERKStepSetTableNum(erkode_mem,BOGACKI_SHAMPINE_4_2_3);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // SET IC
-  state_type q;
-  std::fill(q.begin(),q.end(),0.0);
-  q[0] = pi/2; 
-  q[1] = pi;
-  q[2] = 0; 
-  q[3] = 0; 
-
-  double t0 = 0.0;
-  double tf = 100;
+  realtype t = t0;
+  //realtype dTout = (tf - t0)/n_steps;
+  n_steps = (int) (tf - t0)/expected_dt;
+  realtype dTout = expected_dt;
+  realtype tout = t0 + dTout;
 
   csv << "time,x2,y2,H" << std::endl;
-  
+
   /* START TIMING */
   auto start = std::chrono::steady_clock::now();
-  
+
   /* COMPUTATIONAL CODE */
+  for (int iout=0; iout<n_steps; iout++)
+    {
+
+      flag = ERKStepEvolve(erkode_mem, tout, q, &t, ARK_NORMAL);
+
+      /* CALL FUNCTION TO PRINT OUTPUT TO SCREEN */
+      write_results(q,t);
+      
+      /* CHECK INTEGRATOR FLAG */
+      if (flag >= 0) {     /* SUCCESSFUL SOLVE: UPDATE OUTPUT TIME */
+	tout += dTout;
+	tout = (tout > tf) ? tf : tout;
+      } else {          /* UNSUCCESSFUL SOLVE: BREAK */
+	std::cerr << "+error: integrator" << std::endl;
+	break;
+      }
+    }
   
   auto end = std::chrono::steady_clock::now();
 
+  long int nst, nst_a, nfe, netf;
+  flag = ERKStepGetNumSteps(erkode_mem, &nst);
+  flag = ERKStepGetNumStepAttempts(erkode_mem, &nst_a);
+  flag = ERKStepGetNumRhsEvals(erkode_mem, &nfe);
+  flag = ERKStepGetNumErrTestFails(erkode_mem, &netf);
+
+  printf("\nFinal Solver Statistics:\n");
+  printf("   Internal solver steps = %li (attempted = %li)\n", nst, nst_a);
+  printf("   Total RHS evals = %li\n", nfe);
+  printf("   Total number of error test failures = %li\n\n", netf);
+  
   std::cout << "DONE, ELAPSED TIME(s):  " << std::chrono::duration_cast<std::chrono::seconds>(end-start).count() << std::endl;
 
 }

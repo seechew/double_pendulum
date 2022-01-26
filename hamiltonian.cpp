@@ -61,7 +61,7 @@ void write_results( const state_type &q, const double t)
   double V = -(m1+m2)*l1*g*cos(t1) - m2*l2*g*cos(t2);
   double T = 0.5*m1*pow(l1*p1,2) + 0.5*m2*(pow(l1*p1,2) + pow(l2*p2,2) + 2*l1*l2*p1*p2*cos(t1-t2));
   
-  double H = T - V;
+  double H = T + V;
 
   double x1 =  l1*sin(t1);
   double y1 = -l1*cos(t1);
