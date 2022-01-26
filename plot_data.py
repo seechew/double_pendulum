@@ -12,13 +12,18 @@ y_axis = []
 def readcsv(filename,x_col,y_col,skip_const,chunk):
 
     df = pd.read_csv(filename,dtype='double',chunksize=chunk)
-
+    print("[+] done reading in chucks, cherry pick every nth row: ",skip_const)
+    
     for chunk in tqdm(df, desc = 'CSV chunk progress bar'):
         row = chunk[chunk.index % skip_const == 0]
-        x_axis.append(row.iat[0,x_col])
-        y_axis.append(row.iat[0,y_col])
+        for r in tqdm(range(len(row)), desc = 'inner loop', leave=False):
+            x_axis.append(row.iat[r,x_col])
+            y_axis.append(row.iat[r,y_col])
     
 def plot_me():
+
+    print("length of vector to be plotted: ",len(x_axis))
+    
     plt.colorless()
     plt.plot(x_axis,y_axis)
     plt.show()
@@ -48,8 +53,8 @@ if __name__ == "__main__":
         help='Y-axis column number (deafult=1)')
 
     argparser.add_argument(
-        '-k','--skipdata',
-        metavar="K",
+        '-s','--skipdata',
+        metavar="S",
         default=1,
         type=int,
         help='Skip data for plotting (default=1)')
@@ -57,7 +62,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         '-c','--chunk',
         metavar="C",
-        default=1,
+        default=1000000,
         type=int,
         help='Reading file in chunks (default=1)')
     

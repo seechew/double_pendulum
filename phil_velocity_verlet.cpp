@@ -11,8 +11,8 @@ Reference: https://scienceworld.wolfram.com/physics/DoublePendulum.html
 
 const double m1 = 10;
 const double m2 = 10;
-const double l1 = 10;
-const double l2 = 10;
+const double l1 = 0.001;
+const double l2 = 0.001;
 const double g = 9.8067;
 const double pi = 3.14159265358979323846;
 
@@ -65,7 +65,7 @@ int main() {
 
   double t0 = 0.0;
   double dt = 1e-2;
-  double tf = 100;
+  double tf = 7200;
   double current_t = t0 + dt; // INCREMENT 1
   bool firstStep = true;
   double theta_dot_mid[2] = {0,0};

@@ -114,7 +114,7 @@ static int myf(realtype t, N_Vector q, N_Vector qdot, void *user_data)
 int main() {
 
   realtype t0 = RCONST(0.0);             /* INITIAL TIME */
-  realtype tf= RCONST(100.0);           /* FINAL TIME */
+  realtype tf = RCONST(7200.0);           /* FINAL TIME */
   realtype expected_dt = RCONST(1e-2);    /* */
   int n_steps;                           /* NUMBER OF STEPS */
   sunindextype neq = 4;                  /* NUMBER OF EQUATION */

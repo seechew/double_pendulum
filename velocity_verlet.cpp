@@ -75,7 +75,7 @@ int main() {
   
   double t0 = 0.0;
   double dt = 1e-2;
-  double tf = 7;
+  double tf = 100;
   double current_t = t0 + dt;  // INCREMENT 1
   bool firstStep = true;
   arma::vec theta_dot_mid(2,arma::fill::zeros);

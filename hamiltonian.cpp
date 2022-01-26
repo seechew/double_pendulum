@@ -90,7 +90,7 @@ int main() {
   q[3] = 0; 
 
   double t0 = 0.0;
-  double tf = 100;
+  double tf = 7200;
   double dt = 1e-2;
 
   csv << "time,x2,y2,H" << std::endl;
@@ -98,8 +98,8 @@ int main() {
   /* START TIMING */
   auto start = std::chrono::steady_clock::now();
   
-  //boost::numeric::odeint::integrate(myfunc, q, t0, tf, 1e-5, write_results);
-  boost::numeric::odeint::integrate_const(boost::numeric::odeint::runge_kutta_fehlberg78<state_type>(), myfunc, q, t0, tf, dt, write_results);
+  boost::numeric::odeint::integrate(myfunc, q, t0, tf, 1e-5, write_results);
+  //boost::numeric::odeint::integrate_const(boost::numeric::odeint::runge_kutta_fehlberg78<state_type>(), myfunc, q, t0, tf, dt, write_results);
   //boost::numeric::odeint::integrate_n_steps(boost::numeric::odeint::euler<state_type>(),simple_mbd,q,0.0,0.14285714,7,write_simple_mbd); 
   //boost::numeric::odeint::integrate_const(boost::numeric::odeint::runge_kutta_dopri5<state_type>(),myfunc,q,t0,tf,1e-5,write_results);
   //boost::numeric::odeint::integrate_const(boost::numeric::odeint::symplectic_rkn_sb3a_mclachlan<state_type>(),myfunc,q,0.0,7200.0,1e-5,write_results);
