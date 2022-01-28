@@ -95,10 +95,10 @@ int main() {
     
     H = T + V;
     
-    x1 =  l1*sin(theta[0]);
-    y1 = -l1*cos(theta[0]);
-    x2 =  x1 + l2*sin(theta[1]);
-    y2 =  y1 - l2*cos(theta[1]);
+    x1 =  l1*sin(th1);
+    y1 = -l1*cos(th1);
+    x2 =  x1 + l2*sin(th2);
+    y2 =  y1 - l2*cos(th2);
   
     csv << current_t << "," << x2 << "," << y2 << "," << H << std::endl;
 
