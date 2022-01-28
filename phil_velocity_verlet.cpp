@@ -50,7 +50,7 @@ int main() {
   double theta_dot_dot[2] = {0,0};
 
   double t0 = 0.0;
-  double dt = 1e-6;
+  double dt = 1e-4;
   double tf = 7200;
   double current_t = t0 + dt; // INCREMENT 1
   bool firstStep = true;
