@@ -112,7 +112,7 @@ int main() {
 
   realtype t0 = RCONST(0.0);             /* INITIAL TIME */
   realtype tf = RCONST(7200.0);          /* FINAL TIME */
-  realtype expected_dt = RCONST(1e-2);   /* */
+  realtype expected_dt = RCONST(1e-5);   /* */
   int n_steps;                           /* NUMBER OF STEPS */
   sunindextype neq = 4;                  /* NUMBER OF EQUATION */
   realtype reltol = RCONST(1.0e-6);      /* TOLERANCES */
@@ -138,9 +138,9 @@ int main() {
   /* flag = ERKStepSetTableNum(erkode_mem,BOGACKI_SHAMPINE_4_2_3);  */ // for older SUNDIALS solver only 
 
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_BOGACKI_SHAMPINE_4_2_3);
-  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
+  flag = ERKStepSetTableNum(erkode_mem,ARKODE_CASH_KARP_6_4_5);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_DORMAND_PRINCE_7_4_5);
-  flag = ERKStepSetTableNum(erkode_mem,ARKODE_ARK548L2SAb_ERK_8_4_5);
+  //flag = ERKStepSetTableNum(erkode_mem,ARKODE_ARK548L2SAb_ERK_8_4_5);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_VERNER_8_5_6);
   //flag = ERKStepSetTableNum(erkode_mem,ARKODE_FEHLBERG_13_7_8);
 
