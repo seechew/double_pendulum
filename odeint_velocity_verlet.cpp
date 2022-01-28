@@ -82,6 +82,7 @@ int main() {
   double x1, x2, y1, y2;
   
   boost::numeric::odeint::velocity_verlet<vector_type> stepper;
+  //FAILED: NEED MOMENTA EQ: boost::numeric::odeint::symplectic_euler<vector_type> stepper;
   
   csv << "time,x2,y2,H" << std::endl;
   
